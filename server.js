@@ -15,7 +15,7 @@ const container = require('./container');
 container.resolve(function(users) {
 
   mongoose.Promise = global.Promise;
-  mongoose.connect('mongodb://localhost/footbalkik', {useMongoClient: true});
+  mongoose.connect('mongodb://localhost/footbalkik');
   const app = SetupExpress();
 
   function SetupExpress() {
@@ -34,11 +34,14 @@ container.resolve(function(users) {
 
 
   function ConfigureExpress(app) {
+    require('./passport/passport-local');
+
     app.use(express.static('public'));
     app.use(cookieParser());
     app.set('view engine', 'ejs');
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: true}));
+
     app.use(validator());
     app.use(session({
       secret: 'thisisasecretkey',
@@ -47,7 +50,8 @@ container.resolve(function(users) {
       store: new MongoStore({mongooseConnection: mongoose.connection})
     }))
 
-    app.use(flash);
+    app.use(flash());
+
     app.use(passport.initialize());
     app.use(passport.session());
   }
